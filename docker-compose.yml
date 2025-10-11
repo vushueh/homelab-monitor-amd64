@@ -1,0 +1,292 @@
+
+
+# AMD64 - THE DEFENDER/MONITOR STACK
+# Purpose: Always-on SIEM, monitoring, and management hub
+# Hardware: 8GB RAM recommended (2GB minimum with selective services)
+# Network: Admin VLAN (192.168.10.x)
+
+networks:
+  monitor_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  wazuh_api_config:
+  wazuh_etc:
+  wazuh_logs:
+  wazuh_queue:
+  wazuh_var_multigroups:
+  wazuh_integrations:
+  wazuh_active_response:
+  wazuh_agentless:
+  wazuh_wodles:
+  filebeat_etc:
+  filebeat_var:
+  opensearch_data:
+  portainer_data:
+  netdata_cache:
+  netdata_lib:
+  uptime_kuma_data:
+  suricata_logs:
+  suricata_rules:
+
+services:
+  # ============================================================================
+  # PHASE 1: LIGHTWEIGHT MANAGEMENT (Can run on 2GB + Swap)
+  # Deploy these first - Total RAM: ~1.5GB
+  # ============================================================================
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    networks:
+      - monitor_net
+    ports:
+      - "127.0.0.1:9000:9000"  # Local-only access via SSH tunnel
+      - "127.0.0.1:9443:9443"  # HTTPS local-only
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    mem_limit: 512m
+    mem_reservation: 256m
+    environment:
+      - TZ=America/Denver
+
+  netdata:
+    image: netdata/netdata:latest
+    container_name: netdata
+    restart: unless-stopped
+    hostname: amd64-monitor
+    networks:
+      - monitor_net
+    ports:
+      - "127.0.0.1:19999:19999"  # Local-only access
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdata_cache:/var/cache/netdata
+      - netdata_lib:/var/lib/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    mem_limit: 512m
+    mem_reservation: 256m
+    environment:
+      - NETDATA_CLAIM_TOKEN=
+      - NETDATA_CLAIM_ROOMS=
+      - TZ=America/Denver
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    networks:
+      - monitor_net
+    ports:
+      - "127.0.0.1:3001:3001"  # Local-only access
+    volumes:
+      - uptime_kuma_data:/app/data
+    mem_limit: 512m
+    mem_reservation: 256m
+    environment:
+      - TZ=America/Denver
+
+  # ============================================================================
+  # PHASE 2: SIEM STACK (Requires 8GB RAM upgrade)
+  # Deploy after RAM upgrade - Total RAM: ~5-6GB for full stack
+  # ============================================================================
+
+  wazuh.manager:
+    image: wazuh/wazuh-manager:4.7.2
+    container_name: wazuh-manager
+    restart: unless-stopped
+    hostname: wazuh-manager
+    networks:
+      - monitor_net
+    ports:
+      - "192.168.10.26:1514:1514"      # Agent communication (UDP)
+      - "192.168.10.26:1515:1515"      # Agent enrollment (TCP)
+      - "127.0.0.1:55000:55000"        # API - local only
+    volumes:
+      - wazuh_api_config:/var/ossec/api/configuration
+      - wazuh_etc:/var/ossec/etc
+      - wazuh_logs:/var/ossec/logs
+      - wazuh_queue:/var/ossec/queue
+      - wazuh_var_multigroups:/var/ossec/var/multigroups
+      - wazuh_integrations:/var/ossec/integrations
+      - wazuh_active_response:/var/ossec/active-response/bin
+      - wazuh_agentless:/var/ossec/agentless
+      - wazuh_wodles:/var/ossec/wodles
+      - filebeat_etc:/etc/filebeat
+      - filebeat_var:/var/lib/filebeat
+    mem_limit: 2048m
+    mem_reservation: 1536m
+    environment:
+      - INDEXER_URL=https://wazuh.indexer:9200
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=SecurePassword123!
+      - FILEBEAT_SSL_VERIFICATION_MODE=full
+      - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
+      - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
+      - SSL_KEY=/etc/ssl/filebeat.key
+      - API_USERNAME=wazuh-wui
+      - API_PASSWORD=MyS3cr37P450r.*-
+      - TZ=America/Denver
+    # Uncomment after RAM upgrade:
+    # profiles: ["full-stack"]
+
+  wazuh.indexer:
+    image: wazuh/wazuh-indexer:4.7.2
+    container_name: wazuh-indexer
+    restart: unless-stopped
+    hostname: wazuh-indexer
+    networks:
+      - monitor_net
+    ports:
+      - "127.0.0.1:9200:9200"  # OpenSearch API - local only
+    volumes:
+      - opensearch_data:/var/lib/wazuh-indexer
+    mem_limit: 2048m
+    mem_reservation: 1536m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "bootstrap.memory_lock=true"
+      - "discovery.type=single-node"
+      - "network.host=0.0.0.0"
+      - "plugins.security.ssl.http.enabled=false"
+      - TZ=America/Denver
+    # Uncomment after RAM upgrade:
+    # profiles: ["full-stack"]
+
+  wazuh.dashboard:
+    image: wazuh/wazuh-dashboard:4.7.2
+    container_name: wazuh-dashboard
+    restart: unless-stopped
+    hostname: wazuh-dashboard
+    networks:
+      - monitor_net
+    ports:
+      - "192.168.10.26:443:5601"  # HTTPS Web UI - accessible from Admin VLAN
+    depends_on:
+      - wazuh.indexer
+    mem_limit: 1024m
+    mem_reservation: 768m
+    environment:
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=SecurePassword123!
+      - WAZUH_API_URL=https://wazuh.manager
+      - API_USERNAME=wazuh-wui
+      - API_PASSWORD=MyS3cr37P450r.*-
+      - TZ=America/Denver
+    # Uncomment after RAM upgrade:
+    # profiles: ["full-stack"]
+
+  # ============================================================================
+  # PHASE 3: INTRUSION DETECTION (Add after SIEM is stable)
+  # ============================================================================
+
+  suricata:
+    image: jasonish/suricata:latest
+    container_name: suricata
+    restart: unless-stopped
+    hostname: suricata-ids
+    cap_add:
+      - NET_ADMIN
+      - SYS_NICE
+      - NET_RAW
+    network_mode: host
+    volumes:
+      - suricata_logs:/var/log/suricata
+      - suricata_rules:/var/lib/suricata
+      - /var/log/suricata:/var/log/suricata
+    mem_limit: 1024m
+    mem_reservation: 512m
+    environment:
+      - SURICATA_OPTIONS=-i eth0
+      - TZ=America/Denver
+    # Uncomment after SIEM is working:
+    # profiles: ["full-stack"]
+
+  # ============================================================================
+  # FILEBEAT - Log Forwarder (Works with Phase 1 or 2)
+  # Collects logs from other systems and forwards to Wazuh
+  # ============================================================================
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.0
+    container_name: filebeat
+    restart: unless-stopped
+    hostname: filebeat-collector
+    user: root
+    networks:
+      - monitor_net
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - filebeat_etc:/usr/share/filebeat/data
+    mem_limit: 256m
+    mem_reservation: 128m
+    command: filebeat -e -strict.perms=false
+    environment:
+      - TZ=America/Denver
+    # Basic config - will need customization for your setup
+
+# ============================================================================
+# DEPLOYMENT INSTRUCTIONS
+# ============================================================================
+
+# PHASE 1 (Current 2GB RAM + Swap):
+# docker compose up -d portainer netdata uptime-kuma filebeat
+#
+# Access via SSH tunnel:
+# ssh -L 9000:localhost:9000 -L 19999:localhost:19999 -L 3001:localhost:3001 leonel@192.168.10.26
+# Then open: http://localhost:9000 (Portainer)
+#            http://localhost:19999 (Netdata)
+#            http://localhost:3001 (Uptime Kuma)
+
+# PHASE 2 (After 8GB RAM upgrade):
+# Uncomment the "profiles" lines in Wazuh services
+# docker compose --profile full-stack up -d
+#
+# Access Wazuh Dashboard: https://192.168.10.26
+# Default credentials: admin / SecurePassword123!
+
+# PHASE 3 (Add Suricata):
+# Uncomment Suricata profile line
+# docker compose --profile full-stack up -d suricata
+
+# ============================================================================
+# MEMORY ALLOCATION SUMMARY
+# ============================================================================
+# Phase 1 (Lightweight):
+#   - Portainer:     512 MB
+#   - Netdata:       512 MB
+#   - Uptime Kuma:   512 MB
+#   - Filebeat:      256 MB
+#   Total:          ~1.8 GB (safe with 2GB + swap)
+#
+# Phase 2 (Full SIEM - requires 8GB):
+#   - Wazuh Manager:  2048 MB
+#   - Wazuh Indexer:  2048 MB
+#   - Wazuh Dashboard: 1024 MB
+#   Total Added:     ~5 GB
+#   Grand Total:     ~6.8 GB (safe with 8GB)
+#
+# Phase 3 (Add IDS):
+#   - Suricata:      1024 MB
+#   Total:          ~7.8 GB (tight but works)
