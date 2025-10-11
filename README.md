@@ -388,6 +388,17 @@ This is a personal learning project, but suggestions are welcome!
 - ⏳ Integration with i5/i3 systems - **PLANNED**
 
 ---
+## 📸 Screenshots
+
+### Netdata - Real-time System Monitoring
+![Netdata Dashboard](screenshots/Netdata.JPG)
+
+### Portainer - Docker Container Management  
+![Portainer Interface](screenshots/Portainer.JPG)
+
+### Uptime Kuma - Service Health Monitoring
+![Uptime Kuma Dashboard](screenshots/Uptime%20Kuma.JPG)
+---
 
 ## 📧 Contact
 
