@@ -391,13 +391,13 @@ This is a personal learning project, but suggestions are welcome!
 ## 📸 Screenshots
 
 ### Netdata - Real-time System Monitoring
-![Netdata Dashboard](screenshots/Netdata.JPG)
+![Netdata Dashboard](screenshots/Netdata.jpg)
 
 ### Portainer - Docker Container Management  
-![Portainer Interface](screenshots/Portainer.JPG)
+![Portainer Interface](screenshots/Portainer.jpg)
 
 ### Uptime Kuma - Service Health Monitoring
-![Uptime Kuma Dashboard](screenshots/Uptime%20Kuma.JPG)
+![Uptime Kuma Dashboard](screenshots/Uptime%20Kuma.jpg)
 ---
 
 ## 📧 Contact
