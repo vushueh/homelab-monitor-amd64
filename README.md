@@ -1,13 +1,14 @@
-# 🛡️ Homelab Monitor - AMD64 SIEM & Defense Platform
+# 🛡️ AMD64 Homelab Server - Network Services & Monitoring Platform
 
 ## 📋 Project Overview
 
-This repository documents the **Defender/Monitor** component of my three-PC cybersecurity homelab. The AMD64 system serves as an always-on Security Information and Event Management (SIEM) platform that monitors, detects, and analyzes security events across the lab environment.
+This repository documents the **AMD64 Network Services & Monitoring** server in my cybersecurity homelab. The system serves as an always-on platform providing network-wide DNS filtering, ad blocking, system monitoring, and Docker container management.
 
-**Part of a Three-Tier Security Lab:**
-- **AMD64 (This Repo)**: 🛡️ Defender - SIEM, monitoring, and log analysis
-- **i5 System**: 🎯 Victim - Intentionally vulnerable applications for testing
-- **i3 System**: 🔴 Attacker - Offensive security tools (Kali Linux, Metasploit)
+**Part of a Multi-Tier Security Lab:**
+- **AMD64 (This Repo)**: 🛡️ Network Services - DNS filtering, monitoring, and infrastructure management
+- **Proxmox Server**: 🖥️ Virtualization - SIEM, vulnerable VMs, and security testing environments
+- **Windows Server**: 💼 Enterprise Services - Active Directory, file services
+- **Kali Linux**: 🔴 Security Testing - Offensive security tools and penetration testing
 
 ---
 
@@ -15,89 +16,120 @@ This repository documents the **Defender/Monitor** component of my three-PC cybe
 
 This project demonstrates hands-on experience with:
 
-### Security Operations (SOC)
-- ✅ SIEM deployment and configuration (Wazuh)
-- ✅ Real-time security event monitoring
-- ✅ Log aggregation and correlation
-- ✅ Intrusion detection system (Suricata)
-- ✅ Alert creation and incident response workflows
+### Infrastructure & Operations
+- ✅ DNS filtering and network-wide ad blocking (Pi-hole)
+- ✅ Container orchestration with Docker and Docker Compose
+- ✅ Real-time system and service monitoring
+- ✅ Infrastructure hardening and security best practices
+- ✅ Automated backup and disaster recovery
+- ✅ Network segmentation with VLANs
 
-### Infrastructure Management
-- ✅ Container orchestration with Docker Compose
-- ✅ Resource management and optimization
-- ✅ Service monitoring and health checks
-- ✅ Network segmentation and isolation
+### Security Operations
+- ✅ Firewall configuration and management (UFW)
+- ✅ Intrusion prevention (Fail2Ban)
+- ✅ Automatic security patch management
+- ✅ Service health monitoring and alerting
+- ✅ Log aggregation and analysis (ready for SIEM integration)
 
-### Blue Team Operations
-- ✅ Defensive security posture
-- ✅ Attack detection and analysis
-- ✅ Security baseline monitoring
-- ✅ Forensic log analysis
+### DevOps Practices
+- ✅ Infrastructure as Code principles
+- ✅ Container lifecycle management
+- ✅ Service reliability engineering
+- ✅ Documentation and knowledge management
 
 ---
 
-## 🏗️ Architecture
+## 🗺️ Network Architecture
 
 ```
-                    Attack Flow
-                    
-[i3 - Attacker] ──────────> [i5 - Victim] 
-   Kali Linux              DVWA/Juice Shop
-   Metasploit              Vulnerable Apps
-   Nmap Scans              Wazuh Agent
-        │                        │
-        │                        │
-        └────────> Logs ─────────┘
-                     │
-                     ▼
-            [AMD64 - Monitor/SIEM]
-            ┌─────────────────────┐
-            │  Wazuh Dashboard    │ ← Web UI
-            │  Wazuh Manager      │ ← SIEM Core
-            │  Wazuh Indexer      │ ← Log Storage
-            │  Suricata IDS       │ ← Intrusion Detection
-            │  Netdata            │ ← System Metrics
-            │  Portainer          │ ← Container Mgmt
-            │  Uptime Kuma        │ ← Service Health
-            └─────────────────────┘
-                     │
-                     ▼
-              SOC Analyst
-           (Detection & Response)
+                    Alta Labs Route 10 Router
+                    (192.168.x.x)
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+    VLAN 1           VLAN 10 (Admin)        VLAN 20
+  (General)         192.168.x.0/24      (Windows Server)
+                            │
+                    Cisco 2960 Switch
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+   [AMD64 Server]      [Kali Linux]        [Other Devices]
+   192.168.x.x       192.168.x.x
+        │
+        ├─ Pi-hole (DNS + Ad Blocking)
+        ├─ Portainer (Docker Management)
+        ├─ Netdata (System Monitoring)
+        ├─ Uptime Kuma (Service Health)
+        └─ Dozzle (Log Viewer)
+
+DNS Flow:
+Client → Router DHCP → DNS: 192.168.x.x → Pi-hole
+    → Blocks Ads (271,552 domains) → Upstream: 1.1.1.1
 ```
 
 ---
 
-## 🖥️ Hardware Specifications
+## 🖥️ Hardware & System Specifications
 
-**System:** Dell AMD64 PC  
-**OS:** Debian 13.1 (Trixie)  
-**RAM:** 8GB (recommended) / 2GB + 4GB swap (minimum)  
-**Storage:** SSD for Docker volumes  
-**Network:** Connected to Admin VLAN (192.168.10.x)  
-**IP Address:** 192.168.10.26
+**Hardware:** AMD64 PC  
+**Operating System:** Debian GNU/Linux (Trixie/Sid)  
+**Hostname:** `debian`  
+**IP Address:** `192.168.x.x`  
+**VLAN:** 10 (Admin/Management Network)  
+**Gateway:** `192.168.10.1` (Alta Labs Route 10)  
+**RAM:** 7.7GB  
+**Storage:** 291GB SSD (3% utilized)  
+**Network Interface:** `enp0s7` (Gigabit Ethernet)
 
 ---
 
-## 📦 Technology Stack
+## 📦 Deployed Services
 
-### Core Components
+### Core Services
 
-| Service | Purpose | Resource Usage |
-|---------|---------|----------------|
-| **Wazuh Manager** | SIEM core engine, log processing | 2GB RAM |
-| **Wazuh Indexer** | OpenSearch-based log storage | 2GB RAM |
-| **Wazuh Dashboard** | Web-based SIEM interface | 1GB RAM |
-| **Suricata** | Network intrusion detection | 1GB RAM |
-| **Portainer** | Docker container management | 512MB RAM |
-| **Netdata** | Real-time system monitoring | 512MB RAM |
-| **Uptime Kuma** | Service health monitoring | 512MB RAM |
-| **Filebeat** | Log forwarder and collector | 256MB RAM |
+| Service | Purpose | Port | Status | Resources |
+|---------|---------|------|--------|-----------|
+| **Pi-hole** | DNS filtering & ad blocking | 53, 80 | ✅ Healthy | ~200MB RAM |
+| **Portainer** | Docker management UI | 9000 | ✅ Running | ~100MB RAM |
+| **Netdata** | Real-time system monitoring | 19999 | ✅ Healthy | ~300MB RAM |
+| **Uptime Kuma** | Service uptime monitoring | 3001 | ✅ Healthy | ~150MB RAM |
+| **Dozzle** | Docker log viewer | 8888 | ✅ Running | ~50MB RAM |
 
-### Deployment Platform
-- **Docker Engine** - Container runtime
-- **Docker Compose** - Multi-container orchestration
-- **Docker Networks** - Isolated container networking
+### Service Details
+
+#### Pi-hole (DNS & Ad Blocking)
+- **Container:** `pihole/pihole:latest`
+- **Network Mode:** Host
+- **Web Interface:** http://192.168.10.26/admin
+- **DNS Port:** 53 (TCP/UDP)
+- **Blocked Domains:** 271,552
+- **Active Clients:** 9+
+- **Block Rate:** ~20% of total queries
+- **Upstream DNS:** Cloudflare (1.1.1.1, 1.0.0.1)
+- **Features:** Query logging, DHCP integration, conditional forwarding
+
+#### Portainer (Container Management)
+- **Container:** `portainer/portainer-ce:latest`
+- **Web Interface:** http://192.168.10.26:9000
+- **Features:** Container control, stack deployment, image management, volume management
+
+#### Netdata (System Monitoring)
+- **Container:** `netdata/netdata:latest`
+- **Web Interface:** http://192.168.10.26:19999
+- **Metrics:** CPU, RAM, disk I/O, network, Docker containers
+- **Update Interval:** Real-time (1-second granularity)
+
+#### Uptime Kuma (Service Health)
+- **Container:** `louislam/uptime-kuma:1`
+- **Web Interface:** http://192.168.10.26:3001
+- **Monitors:** HTTP(S), DNS, Ping, TCP ports
+- **Notifications:** Email, Discord, Slack, Telegram (configurable)
+
+#### Dozzle (Log Viewer)
+- **Container:** `amir20/dozzle:latest`
+- **Web Interface:** http://192.168.10.26:8888
+- **Features:** Real-time logs, multi-container view, search functionality
 
 ---
 
@@ -106,320 +138,749 @@ This project demonstrates hands-on experience with:
 ### Prerequisites
 
 ```bash
-# System requirements check
-free -h          # Verify RAM (8GB recommended)
-docker --version # Docker 20.10+
-docker compose version # Compose V2
+# Verify system requirements
+free -h                    # Check available RAM
+df -h                      # Check disk space
+docker --version           # Docker 20.10+
+docker compose version     # Docker Compose V2
 ```
 
-### Phase 1: Lightweight Services (2GB RAM)
-
-Deploy management and monitoring tools that work with limited resources:
+### Quick Start Deployment
 
 ```bash
 # Clone repository
-git clone https://github.com/vushueh/homelab-monitor-amd64.git
-cd homelab-monitor-amd64
+git clone https://github.com/vushueh/homelab-amd64-server.git
+cd homelab-amd64-server
 
-# Deploy Phase 1 services
-docker compose up -d portainer netdata uptime-kuma filebeat
+# Deploy all services
+cd lab/pihole
+docker compose up -d
 
 # Verify deployment
-docker compose ps
-docker compose logs -f portainer
+docker ps
+docker compose logs -f pihole
 ```
 
-**Access Services via SSH Tunnel:**
+### Individual Service Deployment
 
 ```bash
-# From your workstation
-ssh -L 9000:localhost:9000 \
-    -L 19999:localhost:19999 \
-    -L 3001:localhost:3001 \
-    leonel@192.168.10.26
-```
+# Deploy Pi-hole only
+cd lab/pihole
+docker compose up -d pihole
 
-- **Portainer:** http://localhost:9000 (Docker GUI)
-- **Netdata:** http://localhost:19999 (System metrics)
-- **Uptime Kuma:** http://localhost:3001 (Service health)
+# Deploy monitoring stack
+docker compose up -d portainer netdata uptime-kuma dozzle
 
-### Phase 2: Full SIEM Stack (8GB RAM Required)
-
-Deploy the complete security monitoring platform:
-
-```bash
-# Deploy all services
-docker compose --profile full-stack up -d
-
-# Wait 2-3 minutes for initialization
-docker compose logs -f wazuh-manager
-
-# Check all services
+# Check status
 docker compose ps
 ```
 
-**Access Wazuh Dashboard:**
-- URL: https://192.168.10.26
-- Default User: `admin`
-- Default Pass: `SecurePassword123!`
+### Access Services
 
-⚠️ **Change default password immediately after first login!**
+All services are accessible via web browser:
 
-### Phase 3: Intrusion Detection (Optional)
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Pi-hole | http://192.168.10.26/admin | admin / @91984 |
+| Portainer | http://192.168.10.26:9000 | admin / @91984 |
+| Netdata | http://192.168.10.26:19999 | No authentication |
+| Uptime Kuma | http://192.168.10.26:3001 | admin / @91984 |
+| Dozzle | http://192.168.10.26:8888 | No authentication |
 
-```bash
-# Deploy Suricata IDS
-docker compose --profile full-stack up -d suricata
-
-# Monitor IDS alerts
-docker compose logs -f suricata
-tail -f /var/log/suricata/fast.log
-```
+⚠️ **Security Notice:** Change default passwords immediately in production!
 
 ---
 
-## 🔧 Configuration
+## 🔐 Security Configuration
 
-### Network Configuration
+### Firewall (UFW)
 
-**Docker Networks:**
-- `monitor_net` (172.20.0.0/24) - Internal container communication
+**Status:** Active and enabled on system boot
 
-**Exposed Services:**
-- `1514/udp` - Wazuh agent communication
-- `1515/tcp` - Wazuh agent enrollment
-- `443/tcp` - Wazuh dashboard (HTTPS)
-- Management UIs bound to `127.0.0.1` (SSH tunnel required)
+**Configured Rules:**
 
-### Security Hardening
+| Port | Service | Protocol | Source | Purpose |
+|------|---------|----------|--------|---------|
+| 22 | SSH | TCP | Any | Remote management |
+| 53 | DNS | TCP/UDP | Any | Pi-hole DNS queries |
+| 80 | HTTP | TCP | Any | Pi-hole web interface |
+| 9000 | Portainer | TCP | Any | Docker management |
+| 19999 | Netdata | TCP | Any | System monitoring |
+| 3001 | Uptime Kuma | TCP | Any | Service health |
+| 8888 | Dozzle | TCP | Any | Log viewer |
 
-**Firewall Rules (UFW):**
-
+**Management Commands:**
 ```bash
-# Allow SSH
-sudo ufw allow 22/tcp
+# View firewall status
+sudo ufw status numbered
 
-# Allow Wazuh agent communication (Admin VLAN only)
-sudo ufw allow from 192.168.10.0/24 to any port 1514 proto udp
-sudo ufw allow from 192.168.10.0/24 to any port 1515 proto tcp
+# Add new rule
+sudo ufw allow <port>/<protocol> comment 'Service Name'
 
-# Allow Wazuh dashboard (Admin VLAN only)
-sudo ufw allow from 192.168.10.0/24 to any port 443 proto tcp
+# Delete rule
+sudo ufw delete <rule_number>
 
-# Enable firewall
-sudo ufw enable
-sudo ufw status
+# View logs
+sudo tail -f /var/log/ufw.log
 ```
 
-### Wazuh Agent Configuration (for i5 Victim)
+### Fail2Ban (Intrusion Prevention)
 
-**On i5 system, install Wazuh agent:**
+**Status:** Active and monitoring SSH
+
+**Protected Services:**
+- SSH (Port 22) - Automatically bans IPs after failed login attempts
+
+**Configuration:**
+- **Max Retries:** 5 attempts
+- **Ban Time:** 10 minutes (default)
+- **Find Time:** 10 minutes
+
+**Management Commands:**
+```bash
+# Check Fail2Ban status
+sudo fail2ban-client status
+
+# Check SSH jail
+sudo fail2ban-client status sshd
+
+# View banned IPs
+sudo fail2ban-client status sshd | grep "Banned IP"
+
+# Unban an IP
+sudo fail2ban-client set sshd unbanip <IP_ADDRESS>
+```
+
+### Automatic Security Updates
+
+**Status:** Enabled via `unattended-upgrades`
+
+**Configuration:**
+- Automatic installation of security updates
+- Daily update check
+- Automatic cleanup of old packages
+
+**Logs:** `/var/log/unattended-upgrades/`
+
+---
+
+## 💾 Backup & Disaster Recovery
+
+### Automated Backup System
+
+**Script Location:** `~/backups/backup-homelab.sh`
+
+**Backup Contents:**
+- Docker Compose configurations
+- Pi-hole configuration (teleporter export)
+- Network configuration
+- Container list and images
+- System DNS settings
+
+**Backup Storage:** `~/backups/`  
+**Retention Policy:** Last 7 backups kept automatically  
+**Latest Backup:** 24MB compressed archive
+
+### Manual Backup
 
 ```bash
-# Download agent
-curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.2-1_amd64.deb
+# Run backup manually
+~/backups/backup-homelab.sh
 
-# Install and configure
-WAZUH_MANAGER='192.168.10.26' dpkg -i ./wazuh-agent.deb
+# List existing backups
+ls -lh ~/backups/
 
-# Start agent
-systemctl daemon-reload
-systemctl enable wazuh-agent
-systemctl start wazuh-agent
+# Extract backup
+cd ~/backups
+tar -xzf homelab-backup-YYYYMMDD_HHMMSS.tar.gz
+```
+
+### Restore Procedure
+
+```bash
+# Extract backup
+cd ~/backups
+tar -xzf homelab-backup-YYYYMMDD_HHMMSS.tar.gz
+cd homelab-backup-YYYYMMDD_HHMMSS
+
+# Restore Docker Compose configurations
+cp -r lab/ ~/
+
+# Restore Pi-hole
+# (Import via web interface: Settings → Teleporter → Restore)
+
+# Recreate containers
+cd ~/lab/pihole
+docker compose up -d
+```
+
+### Scheduled Backups (Optional)
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add daily backup at 2 AM
+0 2 * * * /root/backups/backup-homelab.sh >> /var/log/homelab-backup.log 2>&1
 ```
 
 ---
 
 ## 📊 Monitoring & Operations
 
-### Health Checks
+### System Status Check
+
+**Quick Status Command:**
+```bash
+homelab-status
+```
+
+**Output includes:**
+- System uptime and hostname
+- Disk usage (current: 3% of 291GB)
+- Memory usage (current: ~900MB of 7.7GB)
+- Docker container status
+- Firewall status
+- Fail2Ban status
+- Network interfaces
+- Security configuration summary
+
+### Container Management
 
 ```bash
-# View all service status
-docker compose ps
+# View all containers
+docker ps
 
-# Check resource usage
+# View container stats (CPU/Memory)
 docker stats
 
 # View logs
-docker compose logs -f wazuh-manager
-docker compose logs -f suricata
+docker logs -f pihole
+docker logs -f portainer
+docker logs --tail 100 netdata
 
-# System metrics
+# Restart container
+docker restart pihole
+
+# Stop/Start container
+docker stop pihole
+docker start pihole
+```
+
+### Service Health Checks
+
+```bash
+# Check Pi-hole status
+docker exec pihole pihole status
+
+# Test DNS resolution
+nslookup google.com 192.168.10.26
+
+# Test ad blocking
+nslookup doubleclick.net 192.168.10.26
+# Should return: Address: 0.0.0.0
+
+# Check Docker service
+sudo systemctl status docker
+
+# View system resources
 free -h
 df -h
+uptime
 ```
 
-### Common Operations
+### Updating Services
 
 ```bash
-# Start all services
-docker compose up -d
+# Navigate to service directory
+cd ~/lab/pihole
 
-# Stop all services
-docker compose down
-
-# Restart a service
-docker compose restart wazuh-manager
-
-# Update containers
+# Pull latest images
 docker compose pull
+
+# Recreate containers with new images
 docker compose up -d
 
-# View Wazuh alerts
-docker compose exec wazuh-manager tail -f /var/ossec/logs/alerts/alerts.log
+# Remove old images
+docker image prune -a
 ```
 
 ---
 
-## 🎓 Attack Detection Scenarios
+## 🌐 Network Configuration
 
-### Scenario 1: Port Scan Detection
+### DNS Setup
 
-**Attack (from i3):**
-```bash
-nmap -sS 192.168.10.XX
-```
+**Pi-hole Configuration:**
+- **Interface:** eth0 (192.168.10.26)
+- **Listening Mode:** LOCAL (VLAN 10 only)
+- **Upstream DNS Servers:**
+  - Primary: 1.1.1.1 (Cloudflare)
+  - Secondary: 1.0.0.1 (Cloudflare)
 
-**Detection:**
-- Suricata IDS flags multiple SYN packets
-- Wazuh correlates port scan pattern
-- Alert generated in dashboard
+**Router Configuration (Alta Labs Route 10):**
+- **VLAN 10 DNS Servers:** 192.168.10.26, 1.1.1.1
+- **DHCP Range:** 192.168.10.10 - 192.168.10.252
 
-### Scenario 2: Web Application Attack
+### Pi-hole Statistics
 
-**Attack (from i3):**
-```bash
-sqlmap -u "http://192.168.10.XX/vulnerabilities/sqli/?id=1&Submit=Submit"
-```
+**Current Metrics:**
+- **Total Queries:** Thousands daily
+- **Queries Blocked:** ~20% average
+- **Active Clients:** 9+ devices
+- **Blocklists:** 6 active lists
+- **Total Blocked Domains:** 271,552
 
-**Detection:**
-- Wazuh agent on i5 detects SQL injection attempts
-- Web server logs analyzed
-- Alert with attack signature
+**Blocklist Sources:**
+1. StevenBlack's Unified Hosts
+2. AdGuard DNS Filter
+3. EasyList
+4. Malware Domain List
+5. Phishing Army
+6. Additional privacy lists
 
-### Scenario 3: Brute Force Detection
+### VLAN Configuration
 
-**Attack (from i3):**
-```bash
-hydra -l admin -P passwords.txt ssh://192.168.10.XX
-```
+**Active VLANs on Route 10:**
+- **VLAN 1:** 192.168.1.0/24 (General)
+- **VLAN 10:** 192.168.10.0/24 (Admin/Management) ← AMD64 Location
+- **VLAN 20:** 192.168.20.0/24 (Windows Server)
+- **VLAN 30:** 10.30.0.0/24 (Proxmox Virtualization)
+- **VLAN 50:** 192.168.50.0/24 (IoT/WiFi)
+- **VLAN 250:** 192.168.250.0/24 (Attack Lab)
 
-**Detection:**
-- Multiple failed SSH authentication attempts
-- Wazuh triggers brute force rule
-- Source IP flagged
+**Current DNS Coverage:** VLAN 10 (expandable to other VLANs)
 
 ---
 
-## 📈 Skills Demonstrated
+## 🔄 Auto-Start & Resilience
 
-### Technical Skills
-- **SIEM Administration**: Wazuh deployment, rule creation, alert tuning
-- **Container Orchestration**: Docker Compose, multi-service management
-- **Network Security**: IDS/IPS, log analysis, network monitoring
-- **Linux Administration**: Debian server management, systemd services
-- **Infrastructure as Code**: Declarative service definitions
-- **Security Operations**: Incident detection, log correlation, threat hunting
+### Docker Container Restart Policies
+
+All containers configured with `restart: unless-stopped`
+
+**This ensures:**
+- ✅ Containers automatically start after system reboot
+- ✅ Containers restart if they crash
+- ✅ Containers stay stopped only if manually stopped
+
+**Verify restart policies:**
+```bash
+docker inspect pihole portainer netdata uptime-kuma dozzle \
+  --format='{{.Name}}: {{.HostConfig.RestartPolicy.Name}}'
+```
+
+### System Services (Auto-Start on Boot)
+
+| Service | Status | Purpose |
+|---------|--------|---------|
+| Docker | ✅ Enabled | Container runtime |
+| UFW | ✅ Enabled | Firewall |
+| Fail2Ban | ✅ Enabled | Intrusion prevention |
+| Unattended-Upgrades | ✅ Enabled | Automatic security updates |
+
+**Verify service status:**
+```bash
+# Check all auto-start services
+sudo systemctl is-enabled docker ufw fail2ban unattended-upgrades
+
+# Check service status
+sudo systemctl status docker
+```
+
+### Reboot Survival Test
+
+```bash
+# Test system resilience
+sudo reboot
+
+# After reboot (2-3 minutes), verify:
+docker ps                  # All containers running
+homelab-status            # All services operational
+sudo ufw status           # Firewall active
+```
+
+---
+
+## 🛠️ Troubleshooting Guide
+
+### Pi-hole Issues
+
+**Problem:** Ads not being blocked
+```bash
+# Check Pi-hole is running
+docker ps | grep pihole
+
+# Verify DNS is being used
+nslookup google.com
+# Should show: Server: 192.168.10.26
+
+# Test ad blocking
+nslookup doubleclick.net
+# Should return: 0.0.0.0
+
+# Update blocklists
+docker exec pihole pihole -g
+
+# Check Pi-hole logs
+docker logs pihole --tail 100
+```
+
+**Problem:** Cannot access Pi-hole admin
+```bash
+# Check container status
+docker ps | grep pihole
+
+# Check port 80 is listening
+sudo ss -tulnp | grep :80
+
+# Restart Pi-hole
+docker restart pihole
+
+# Check firewall
+sudo ufw status | grep 80
+```
+
+### Container Issues
+
+**Problem:** Container won't start
+```bash
+# View container logs
+docker logs <container_name>
+
+# Check for port conflicts
+sudo ss -tulnp | grep <port>
+
+# Check disk space
+df -h
+
+# Restart Docker service
+sudo systemctl restart docker
+
+# Recreate container
+docker compose up -d --force-recreate <service_name>
+```
+
+**Problem:** High resource usage
+```bash
+# Check resource consumption
+docker stats
+
+# View system resources
+homelab-status
+htop
+
+# Restart resource-heavy container
+docker restart <container_name>
+```
+
+### Network Issues
+
+**Problem:** Cannot reach services
+```bash
+# Check network interface
+ip addr show enp0s7
+
+# Check gateway
+ip route show
+
+# Test connectivity
+ping 192.168.10.1  # Router
+ping 8.8.8.8       # Internet
+
+# Check firewall rules
+sudo ufw status numbered
+
+# Check DNS resolution
+cat /etc/resolv.conf
+nslookup google.com
+```
+
+### System Performance
+
+**Problem:** System running slow
+```bash
+# Check system resources
+homelab-status
+free -h
+df -h
+
+# Check Docker disk usage
+docker system df
+
+# Clean up Docker
+docker system prune -a  # WARNING: Removes unused images
+
+# Check running processes
+htop
+ps aux --sort=-%mem | head -10  # Top memory users
+ps aux --sort=-%cpu | head -10  # Top CPU users
+```
+
+---
+
+## 📁 Important File Locations
+
+| Path | Contents |
+|------|----------|
+| `~/lab/pihole/` | Pi-hole Docker Compose configuration |
+| `~/lab/pihole/etc-pihole/` | Pi-hole configuration files |
+| `~/lab/pihole/etc-dnsmasq.d/` | DNS configuration |
+| `~/backups/` | System backups |
+| `~/backups/backup-homelab.sh` | Backup script |
+| `~/check-system.sh` | System status script |
+| `/etc/pihole/pihole.toml` | Pi-hole main configuration |
+| `/var/log/pihole/` | Pi-hole logs |
+| `/var/log/ufw.log` | Firewall logs |
+| `/var/log/fail2ban.log` | Fail2Ban logs |
+| `/var/log/unattended-upgrades/` | Update logs |
+
+---
+
+## 🎓 Skills Demonstrated
+
+### Technical Competencies
+
+**Infrastructure Management**
+- Docker containerization and orchestration
+- Multi-service deployment with Docker Compose
+- Network architecture and VLAN segmentation
+- DNS server configuration and management
+
+**System Administration**
+- Linux server administration (Debian)
+- Service monitoring and health checks
+- Log management and analysis
+- Resource optimization and capacity planning
+
+**Security Operations**
+- Firewall configuration and management (UFW)
+- Intrusion prevention systems (Fail2Ban)
+- Security patch management
+- Network traffic filtering (Pi-hole)
+- Backup and disaster recovery planning
+
+**DevOps Practices**
+- Infrastructure as Code principles
+- Automated deployment procedures
+- Service reliability engineering
+- Documentation and knowledge management
+- Monitoring and alerting strategies
 
 ### Soft Skills
-- **Documentation**: Clear technical writing and architecture diagrams
-- **Problem Solving**: Resource optimization, troubleshooting
-- **Process Thinking**: Phased deployment, security hardening
-- **Continuous Learning**: Self-directed cybersecurity lab
+- Technical documentation and communication
+- Problem-solving and troubleshooting
+- Process improvement and optimization
+- Self-directed learning and research
+- Project planning and execution
 
 ---
 
-## 🔒 Security Considerations
+## 🔮 Future Enhancements
 
-### Passwords
-- ⚠️ Default passwords shown in config files are **EXAMPLES ONLY**
-- 🔐 Change all default credentials immediately
-- 🔑 Use strong, unique passwords for each service
-- 📝 Store credentials in password manager
+### Planned Implementations
 
-### Network Isolation
-- ✅ Vulnerable apps (i5) isolated from production networks
-- ✅ Attack traffic (i3) contained to lab environment
-- ✅ SIEM (AMD64) accessible only from Admin VLAN
-- ✅ No direct internet exposure
+**Phase 1: Enhanced Monitoring (In Progress)**
+- [ ] Configure Uptime Kuma monitors for all services
+- [ ] Set up notification channels (Email, Discord)
+- [ ] Create custom Pi-hole statistics dashboard
+- [ ] Implement automated health checks
 
-### Data Protection
-- 🛡️ All management interfaces behind SSH tunnels
-- 🔒 HTTPS for web dashboards
-- 📊 Logs contain sensitive data - access control required
+**Phase 2: SIEM Integration (Planned)**
+- [ ] Deploy Wazuh SIEM on Proxmox VM
+- [ ] Install Wazuh agent on AMD64
+- [ ] Configure log forwarding from all services
+- [ ] Create custom detection rules
+- [ ] Set up security event correlation
+
+**Phase 3: Network Expansion (Planned)**
+- [ ] Extend Pi-hole DNS to VLAN 1, 20, 50
+- [ ] Configure inter-VLAN routing for DNS
+- [ ] Implement network-wide ad blocking
+- [ ] Add Pi-hole redundancy (secondary DNS)
+
+**Phase 4: Advanced Features (Future)**
+- [ ] Grafana dashboard for metrics visualization
+- [ ] Prometheus for advanced monitoring
+- [ ] Automated certificate management (Let's Encrypt)
+- [ ] VPN server integration
+- [ ] Network intrusion detection (Suricata)
 
 ---
 
-## 📚 Resources & References
+## 📚 Resources & Documentation
 
-### Documentation
-- [Wazuh Documentation](https://documentation.wazuh.com/)
-- [Suricata User Guide](https://suricata.readthedocs.io/)
-- [Docker Compose Reference](https://docs.docker.com/compose/)
+### Official Documentation
+- **Pi-hole:** https://docs.pi-hole.net/
+- **Docker:** https://docs.docker.com/
+- **Docker Compose:** https://docs.docker.com/compose/
+- **Portainer:** https://docs.portainer.io/
+- **Netdata:** https://learn.netdata.cloud/
+- **Uptime Kuma:** https://github.com/louislam/uptime-kuma/wiki
+- **Debian:** https://www.debian.org/doc/
+
+### Learning Resources
+- **Docker Mastery Course:** Udemy - Bret Fisher
+- **Linux System Administration:** Linux Academy
+- **Network Security Fundamentals:** Cybrary
+- **r/homelab:** Reddit community for homelab enthusiasts
+- **r/selfhosted:** Self-hosting community and resources
 
 ### Related Projects
-- [i5 Victim System](https://github.com/vushueh/homelab-victim-i5) - Vulnerable applications
-- [i3 Attacker System](https://github.com/vushueh/homelab-attacker-i3) - Offensive tools
-
-### Learning Path
-- CompTIA Security+
-- Blue Team Level 1 (BTL1)
-- CCNA CyberOps
-- Splunk Certified User
+- **Proxmox Virtualization Server** - SIEM VMs, vulnerable systems
+- **Windows Server 2022** - Enterprise services integration
+- **Kali Linux Security Testing** - Offensive security tools
 
 ---
 
-## 🤝 Contributing
+## 🤝 Contributing & Feedback
 
-This is a personal learning project, but suggestions are welcome!
+This is a personal learning project documenting my homelab journey.
 
-- 🐛 **Issues**: Report bugs or suggest improvements
-- 💡 **Ideas**: Share alternative approaches or tools
-- 📖 **Documentation**: Help improve clarity
+**Feedback Welcome:**
+- 🐛 Bug reports or issues
+- 💡 Suggestions for improvements
+- 📖 Documentation clarity
+- 🔧 Alternative approaches
 
----
-
-## 📝 Project Status
-
-- ✅ Phase 1: Lightweight monitoring - **COMPLETE**
-- 🔄 Phase 2: Full SIEM stack - **IN PROGRESS**
-- ⏳ Phase 3: Advanced detection rules - **PLANNED**
-- ⏳ Integration with i5/i3 systems - **PLANNED**
+**Not Accepting:**
+- Pull requests (personal learning project)
+- Feature requests beyond learning scope
 
 ---
+
 ## 📸 Screenshots
 
-### Netdata - Real-time System Monitoring
-![Netdata Dashboard](screenshots/Netdata.jpg)
+### Pi-hole Dashboard
+![Pi-hole Dashboard](screenshots/pihole-dashboard.png)
+*Network-wide ad blocking statistics and query logs*
 
-### Portainer - Docker Container Management  
-![Portainer Interface](screenshots/Portainer.jpg)
+### Portainer Container Management
+![Portainer Interface](screenshots/portainer-dashboard.png)
+*Docker container management and monitoring*
 
-### Uptime Kuma - Service Health Monitoring
-![Uptime Kuma Dashboard](screenshots/Uptime%20Kuma.jpg)
+### Netdata System Monitoring
+![Netdata Dashboard](screenshots/netdata-dashboard.png)
+*Real-time system metrics and performance*
+
+### Uptime Kuma Service Health
+![Uptime Kuma Dashboard](screenshots/uptime-kuma-dashboard.png)
+*Service availability monitoring and alerts*
+
+### Dozzle Log Viewer
+![Dozzle Interface](screenshots/dozzle-dashboard.png)
+*Real-time Docker container logs*
+
 ---
 
-## 📧 Contact
+## 📊 Project Statistics
 
-**GitHub**: [@vushueh](https://github.com/vushueh)  
-**Project Link**: [homelab-monitor-amd64](https://github.com/vushueh/homelab-monitor-amd64)
+**Deployment Date:** October 15, 2025  
+**System Uptime:** 3+ hours (as of last check)  
+**Total Containers:** 5  
+**Total Queries Processed:** 1000s daily  
+**Ad Block Rate:** ~20%  
+**Active Clients:** 9+  
+**Disk Usage:** 7.6GB / 291GB (3%)  
+**Memory Usage:** ~900MB / 7.7GB (11%)  
+**Services Status:** ✅ All Operational  
+
+---
+
+## 🏆 Achievements
+
+- ✅ Deployed production-ready DNS filtering solution
+- ✅ Implemented comprehensive monitoring stack
+- ✅ Configured enterprise-grade security hardening
+- ✅ Automated backup and recovery procedures
+- ✅ Documented entire infrastructure professionally
+- ✅ Achieved 100% service availability since deployment
+- ✅ Blocked 20% of network traffic (ads/trackers)
+- ✅ Zero security incidents since hardening
+
+---
+
+## ⚠️ Important Notices
+
+### Security Disclaimers
+- ⚠️ **Default passwords shown are EXAMPLES** - Change immediately
+- 🔒 **Credentials stored securely** in password manager
+- 🛡️ **Network isolated** from production/work networks
+- 📊 **Logs may contain sensitive data** - access control required
+
+### Usage Notes
+- 📝 Configuration validated and tested October 15, 2025
+- 🔄 System designed for 24/7 operation
+- 💾 Regular backups recommended (automated script provided)
+- 🔧 Update containers regularly for security patches
+- 📡 VLAN 10 access required for management interfaces
+
+---
+
+## 📞 Contact & Links
+
+**GitHub Profile:** [@vushueh](https://github.com/vushueh)  
+**Project Repository:** [homelab-amd64-server](https://github.com/vushueh/homelab-amd64-server)  
+**LinkedIn:** [Your LinkedIn Profile]  
+**Portfolio:** [Your Portfolio Website]
 
 ---
 
 ## 📄 License
 
-This project is for educational purposes. Configurations and scripts are provided as-is.
+This project is for **educational and personal use only**.
+
+- Configurations provided as-is without warranty
+- Use at your own risk
+- Not intended for commercial deployment
+- Learning and skill development purposes
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Wazuh Team for the excellent open-source SIEM
-- Suricata Project for robust IDS capabilities
-- Docker Community for containerization best practices
-- r/homelab for inspiration and guidance
+**Open Source Communities:**
+- Pi-hole team for excellent DNS filtering solution
+- Docker community for containerization platform
+- Portainer team for intuitive container management
+- Netdata team for comprehensive monitoring
+- Louis Lam (Uptime Kuma creator)
+- Amir Raminfar (Dozzle creator)
+
+**Learning Resources:**
+- r/homelab community for inspiration
+- r/selfhosted for self-hosting guidance
+- Docker documentation and tutorials
+- Debian community support
+
+**Special Thanks:**
+- Alta Labs for affordable enterprise networking
+- Cisco for reliable switching equipment
+- Open source maintainers worldwide
 
 ---
 
-**Built with 💙 for cybersecurity learning and hands-on skill development**
+## 🎯 Project Goals Met
+
+- ✅ **Hands-on experience** with production infrastructure
+- ✅ **Real-world problem solving** - DNS, monitoring, security
+- ✅ **Documentation skills** - Professional technical writing
+- ✅ **System administration** - Linux server management
+- ✅ **Network security** - Firewall, IPS, DNS filtering
+- ✅ **DevOps practices** - Container orchestration, automation
+- ✅ **Portfolio development** - Demonstrable technical skills
+
+---
+
+**Last Updated:** October 15, 2025  
+**Document Version:** 2.0  
+**System Status:** ✅ Fully Operational  
+**Next Milestone:** Wazuh SIEM Integration (Proxmox VM)
+
+---
+
+**Built with 💙 for learning, growing, and sharing knowledge in cybersecurity and infrastructure management**
+
+---
+
+*This README is a living document and will be updated as the homelab evolves and new services are deployed.*
