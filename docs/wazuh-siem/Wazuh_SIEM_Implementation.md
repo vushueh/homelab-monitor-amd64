@@ -113,16 +113,16 @@ A complete Security Information and Event Management (SIEM) system monitoring 3 
 |-----------|-------|
 | **URL** | https://192.168.10.156 |
 | **Username** | admin |
-| **Password** | wR3SO3NcSmytxjK1jRPPNJzn.?rPmI44 |
+| **Password** |  |
 
 ### AMD64 Server Services
 
 | Service | URL | Username | Password |
 |---------|-----|----------|----------|
-| **Pi-hole** | http://192.168.10.26/admin | admin | Michelle3@91984 |
-| **Portainer** | http://192.168.10.26:9000 | admin | Michelle3@91984 |
+| **Pi-hole** | http://192.168.10.26/admin | admin |  |
+| **Portainer** | http://192.168.10.26:9000 | admin |  |
 | **Netdata** | http://192.168.10.26:19999 | - | (no auth) |
-| **Uptime Kuma** | http://192.168.10.26:3001 | admin | Michelle3@91984 |
+| **Uptime Kuma** | http://192.168.10.26:3001 | admin |  |
 | **Dozzle** | http://192.168.10.26:8888 | - | (no auth) |
 
 ### SSH Access
